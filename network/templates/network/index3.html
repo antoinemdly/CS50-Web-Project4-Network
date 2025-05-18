@@ -1,0 +1,143 @@
+{% extends "network/layout.html" %}
+
+{%load static%}
+
+{% block body %}
+
+<script src="{% static 'network/script.js' %}"></script>
+
+<script>
+    var counter = 1
+    var page = 'all'
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        const page_buttons = document.querySelectorAll('.page_button');
+        page_buttons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                counter = this.dataset.page;
+                display_post(page, counter);
+                scrollToTop()
+            })
+        })
+
+        document.querySelector('#previous_button').addEventListener('click', function () {
+            counter--;
+            display_post(page, counter);
+            scrollToTop()
+        })
+        document.querySelector('#next_button').addEventListener('click', function () {
+            counter++;
+            display_post(page, counter);
+            scrollToTop()
+        })
+
+        const following_link = document.querySelector('#following')
+
+        if (following_link) {
+            following_link.addEventListener('click', function() {
+                page = 'following'
+                counter = 1
+                display_post(page, counter)
+            })
+        }
+
+        const user_profile_link = document.querySelector('#user_profile')
+
+        if (user_profile_link) {
+            user_profile_link.addEventListener('click',() => {
+                const username = document.querySelector('#username').innerHTML
+                page = username
+                counter = 1
+                display_post(page, counter)
+            })
+        }
+
+        document.querySelector('#display_toggle').addEventListener('click', function(event) {
+            if (this.innerHTML === 'New Post') {
+                const new_post = document.querySelector('#new_post')
+                resetAnimation(new_post)
+                new_post.style.animationPlayState = 'running'
+                new_post.style.animationDirection = 'normal'
+                this.innerHTML = 'Close'
+            }
+            else if (this.innerHTML === 'Close') {
+                const new_post = document.querySelector('#new_post')
+                resetAnimation(new_post)
+                new_post.style.animationPlayState = 'running'
+                new_post.style.animationDirection = 'reverse'
+                this.innerHTML = 'New Post'
+            }
+        })
+
+        document.querySelector('#new_post_button').addEventListener('click', function(){
+            const content = document.querySelector('#new_post_text').value
+            console.log(content)
+            fetch('/posts/new_post', {
+                method: 'POST',
+                body: JSON.stringify({
+                    content: content,
+                })
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        return;
+                    }
+
+                    return response.json();
+                })
+                .then(result => {
+                    // Print result
+                    console.log(result);
+
+                    page = 'all'
+                    counter = 1
+                    display_post(page, counter)
+
+                    document.querySelector('#new_post_text').value = ""
+                })
+        })
+
+        document.querySelector('#posts').addEventListener('click', function(event) {
+            if (event.target.classList.contains('user_profile')) {
+                const username = event.target.dataset.username;
+                page = username;
+                counter = 1;
+                display_post(page, counter);
+            }
+        })
+
+        display_post(page, counter)
+    })  
+
+</script>
+
+<!-- <div id="user_info"></div> -->
+
+
+<button id="display_toggle">New Post</button>
+<div id="new_post">
+    <div>
+        <textarea id="new_post_text"></textarea>
+    </div>
+    <div>
+        <button id="new_post_button">New Post</button>
+    </div>
+</div>
+
+<div id="posts"></div>
+
+<nav aria-label="Page navigation" id="nav_page" >
+    <ul class="pagination justify-content-center">
+      <li class="page-item disabled" id="previous">
+        <buton class="page-link" id="previous_button">Previous</button>
+      </li>
+      <li class="page-item page_li active"><button class="page-link page_button" id="page1" data-page="1">1</button></li>
+      <li class="page-item page_li"><button class="page-link page_button" id="page2" data-page="2">2</button></li>
+      <li class="page-item page_li"><button class="page-link page_button" id="page3" data-page="3">3</button></li>
+      <li class="page-item" id="next">
+        <button class="page-link" id="next_button">Next</button>
+      </li>
+    </ul>
+</nav>
+{% endblock %}

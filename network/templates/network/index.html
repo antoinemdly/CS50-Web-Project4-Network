@@ -1,0 +1,67 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const all_post_button = document.querySelector('#all-posts')
+            all_post_button.addEventListener('click', function(){
+                display_post('all')
+            });
+
+            document.querySelector('#following-button').addEventListener('click', () => display_post('followed'));
+        });
+        
+        function display_post(category){
+            block = document.querySelector('#all')
+                block.innerHTML = ""
+                fetch(`/posts/${category}`, {
+                    method: 'GET',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(post => {
+                        const user = document.createElement('p')
+                        const content = document.createElement('p')
+                        const date = document.createElement('p')
+                        const likes = document.createElement('p')
+
+                        const div = document.createElement('div')
+                        div.className = 'post_div'
+                        user.innerHTML = post['user']
+                        content.innerHTML = post['content']
+                        date.innerHTML = post['date']
+                        likes.innerHTML = post['likes']
+
+                        div.appendChild(user)
+                        div.appendChild(content)
+                        div.appendChild(date)
+                        div.appendChild(likes)
+
+                        block.appendChild(div)
+                    });
+                })
+
+                block.style.display = 'block'
+        }
+
+    </script>
+
+    <div id="all"></div>
+    <div id="followed"></div>
+    <div id="user"></div>
+    
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+          </li>
+          <li class="page-item"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item">
+            <a class="page-link" href="#">Next</a>
+          </li>
+        </ul>
+    </nav>
+
+{% endblock %}

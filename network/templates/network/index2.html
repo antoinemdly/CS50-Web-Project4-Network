@@ -1,0 +1,92 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Social Network{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+        
+        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+    </head>
+    <body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+        function App() {
+            const [category, setCategory] = React.useState('all');
+
+            function inputClick(event):
+
+            function Posts(category) {
+                const [data, setData] = React.useState([]);
+
+                React.useEffect(() => {
+                    fetch(`/posts/${category}`, {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => setData(data))
+                    .catch(error => console.error('Error:', error));
+                }, [category]);
+
+                return (
+                    <div className="posts">
+                        {data.map((item, index) => (
+                            <div key={index} className="item">
+                                <h4>{item.user}</h4>
+                                <h3>{item.content}</h3>
+                                <p>{item.date}</p>
+                                <p>{item.likes}</p>
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+
+            return (
+                <div>
+                    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+                        <a className="navbar-brand" href="#">Network</a>
+                        <div>
+                            <ul className="navbar-nav mr-auto">
+                                {% if user.is_authenticated %}
+                                    <li className="nav-item">
+                                        <a className="nav-link" href="#"><strong>{{ user.username }}</strong></a>
+                                    </li>
+                                {% endif %}
+                                <li className="nav-item">
+                                    <button className="nav-link btn btn-link" onClick={() => Posts('all')}>
+                                        All Posts
+                                    </button>
+                                </li>
+                                {% if user.is_authenticated %}
+                                    <li className="nav-item">
+                                        <a className="nav-link" href="#">Following</a>
+                                    </li>
+                                    <li className="nav-item">
+                                        <a className="nav-link" href="{% url 'logout' %}">Log Out</a>
+                                    </li>
+                                {% else %}
+                                    <li className="nav-item">
+                                        <a className="nav-link" href="{% url 'login' %}">Log In</a>
+                                    </li>
+                                    <li className="nav-item">
+                                        <a className="nav-link" href="{% url 'register' %}">Register</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </nav>
+
+                    <Posts category={category} />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('app'));
+    </script>
+    </body>
+</html>
